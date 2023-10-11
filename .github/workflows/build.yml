@@ -1,5 +1,6 @@
 ---
 name: dua-cli
+run-name: dua-${{inputs.version}}
 
 on:
   workflow_dispatch:
@@ -46,6 +47,9 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           cp src/target/${{matrix.target}}/release/dua .
+          if [[ "${{matrix.target}}" != *darwin* ]]; then
+          upx --best --ultra-brute dua || true
+          fi
           tar -czf "dua-v${{inputs.version}}-${{matrix.target}}.tar.gz" dua
           # create release if not exist
           gh release create "${{inputs.version}}" --notes "Release dua-cli v${{inputs.version}}" --title "${{inputs.version}}" --repo "${{github.repository}}" || true
@@ -74,6 +78,9 @@ jobs:
           wget -O /tmp/${{matrix.target}}/${{matrix.target}}.tar.gz https://github.com/Byron/dua-cli/releases/download/v${{inputs.version}}/dua-v${{inputs.version}}-${{matrix.target}}.tar.gz
           tar --strip-components 1 -C /tmp/${{matrix.target}} -xvzf /tmp/${{matrix.target}}/${{matrix.target}}.tar.gz
           cp /tmp/${{matrix.target}}/dua .
+          if [[ "${{matrix.target}}" != *darwin* ]]; then
+          upx --best --ultra-brute dua || true
+          fi
           tar -czf "dua-v${{inputs.version}}-${{matrix.target}}.tar.gz" dua
           # create release if not exist
           gh release create "${{inputs.version}}" --notes "Release dua-cli v${{inputs.version}}" --title "${{inputs.version}}" --repo "${{github.repository}}" || true
